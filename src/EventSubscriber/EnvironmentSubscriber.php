@@ -12,7 +12,6 @@ use App\Exception\InvalidEnvironmentException;
 use App\Exception\OrigamiExceptionInterface;
 use App\Service\ApplicationData;
 use App\Service\Middleware\Binary\Docker;
-use App\Service\Middleware\Binary\Mutagen;
 use App\Service\Middleware\Hosts;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -20,14 +19,12 @@ class EnvironmentSubscriber implements EventSubscriberInterface
 {
     private Hosts $hosts;
     private Docker $docker;
-    private Mutagen $mutagen;
     private ApplicationData $applicationData;
 
-    public function __construct(Hosts $hosts, Docker $docker, Mutagen $mutagen, ApplicationData $applicationData)
+    public function __construct(Hosts $hosts, Docker $docker, ApplicationData $applicationData)
     {
         $this->hosts = $hosts;
         $this->docker = $docker;
-        $this->mutagen = $mutagen;
         $this->applicationData = $applicationData;
     }
 
@@ -91,10 +88,6 @@ class EnvironmentSubscriber implements EventSubscriberInterface
             $io->error('An error occurred while trying to fix the permissions on the shared SSH agent.');
         }
 
-        if (!$this->mutagen->startDockerSynchronization()) {
-            $io->error('An error occurred while starting the Docker synchronization.');
-        }
-
         $environment->activate();
         $this->applicationData->save();
     }
@@ -105,13 +98,8 @@ class EnvironmentSubscriber implements EventSubscriberInterface
     public function onEnvironmentStop(EnvironmentStoppedEvent $event): void
     {
         $environment = $event->getEnvironment();
-        $io = $event->getConsoleStyle();
-
-        if (!$this->mutagen->removeDockerSynchronization()) {
-            $io->error('An error occurred while removing the Docker synchronization.');
-        }
-
         $environment->deactivate();
+
         $this->applicationData->save();
     }
 
@@ -121,13 +109,8 @@ class EnvironmentSubscriber implements EventSubscriberInterface
     public function onEnvironmentUninstall(EnvironmentUninstalledEvent $event): void
     {
         $environment = $event->getEnvironment();
-        $io = $event->getConsoleStyle();
-
-        if (!$this->mutagen->removeDockerSynchronization()) {
-            $io->error('An error occurred while removing the Docker synchronization.');
-        }
-
         $this->applicationData->remove($environment);
+
         $this->applicationData->save();
     }
 }

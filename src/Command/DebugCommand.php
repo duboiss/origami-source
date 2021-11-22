@@ -10,7 +10,6 @@ use App\Exception\OrigamiExceptionInterface;
 use App\Service\ApplicationContext;
 use App\Service\Middleware\Binary\Docker;
 use App\Service\Middleware\Binary\Mkcert;
-use App\Service\Middleware\Binary\Mutagen;
 use App\Service\Wrapper\OrigamiStyle;
 use App\ValueObject\EnvironmentEntity;
 use Symfony\Component\Console\Command\Command;
@@ -25,14 +24,12 @@ class DebugCommand extends AbstractBaseCommand
     protected static $defaultDescription = 'Shows system information and the configuration of the current environment';
 
     private Docker $docker;
-    private Mutagen $mutagen;
     private Mkcert $mkcert;
     private ApplicationContext $applicationContext;
     private string $installDir;
 
     public function __construct(
         Docker $docker,
-        Mutagen $mutagen,
         Mkcert $mkcert,
         ApplicationContext $applicationContext,
         string $installDir,
@@ -41,7 +38,6 @@ class DebugCommand extends AbstractBaseCommand
         parent::__construct($name);
 
         $this->docker = $docker;
-        $this->mutagen = $mutagen;
         $this->mkcert = $mkcert;
         $this->applicationContext = $applicationContext;
         $this->installDir = $installDir;
@@ -81,7 +77,6 @@ class DebugCommand extends AbstractBaseCommand
             ['Binary', 'Version'],
             [
                 ['docker', $this->docker->getVersion()],
-                ['mutagen', $this->mutagen->getVersion()],
                 ['mkcert', $this->mkcert->getVersion()],
             ]
         );
