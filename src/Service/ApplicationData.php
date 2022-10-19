@@ -77,9 +77,9 @@ class ApplicationData
     /**
      * Retrieves all the environments currently registered.
      */
-    public function getAllEnvironments(): EnvironmentCollection
+    public function getAllEnvironments(bool $arrayFormat = false): array|EnvironmentCollection
     {
-        return $this->environments;
+        return $arrayFormat ? iterator_to_array($this->environments) : $this->environments;
     }
 
     /**

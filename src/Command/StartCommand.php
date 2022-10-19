@@ -8,6 +8,7 @@ use App\Event\EnvironmentStartedEvent;
 use App\Exception\InvalidEnvironmentException;
 use App\Exception\OrigamiExceptionInterface;
 use App\Service\ApplicationContext;
+use App\Service\ApplicationData;
 use App\Service\Middleware\Binary\Docker;
 use App\Service\Wrapper\OrigamiStyle;
 use App\Service\Wrapper\ProcessProxy;
@@ -26,6 +27,7 @@ class StartCommand extends AbstractBaseCommand
 {
     public function __construct(
         private ApplicationContext $applicationContext,
+        private ApplicationData $applicationData,
         private ProcessProxy $processProxy,
         private Docker $docker,
         private EventDispatcherInterface $eventDispatcher,
@@ -42,7 +44,9 @@ class StartCommand extends AbstractBaseCommand
         $this->addArgument(
             'environment',
             InputArgument::OPTIONAL,
-            'Name of the environment to start'
+            'Name of the environment to start',
+            null,
+            fn () => array_map(static fn ($environment) => $environment->getName(), (array) $this->applicationData->getAllEnvironments(true))
         );
     }
 

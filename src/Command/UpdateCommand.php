@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Exception\InvalidEnvironmentException;
 use App\Exception\OrigamiExceptionInterface;
 use App\Service\ApplicationContext;
+use App\Service\ApplicationData;
 use App\Service\Setup\ConfigurationFiles;
 use App\Service\Setup\EnvironmentBuilder;
 use App\Service\Wrapper\OrigamiStyle;
@@ -24,6 +25,7 @@ class UpdateCommand extends AbstractBaseCommand
 {
     public function __construct(
         private ApplicationContext $applicationContext,
+        private ApplicationData $applicationData,
         private EnvironmentBuilder $builder,
         private ConfigurationFiles $configuration,
         string $name = null
@@ -39,7 +41,9 @@ class UpdateCommand extends AbstractBaseCommand
         $this->addArgument(
             'environment',
             InputArgument::OPTIONAL,
-            'Name of the environment to update'
+            'Name of the environment to update',
+            null,
+            fn () => array_map(static fn ($environment) => $environment->getName(), (array) $this->applicationData->getAllEnvironments(true))
         );
     }
 

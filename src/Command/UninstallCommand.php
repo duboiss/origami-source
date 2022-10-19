@@ -8,6 +8,7 @@ use App\Event\EnvironmentUninstalledEvent;
 use App\Exception\InvalidEnvironmentException;
 use App\Exception\OrigamiExceptionInterface;
 use App\Service\ApplicationContext;
+use App\Service\ApplicationData;
 use App\Service\Middleware\Binary\Docker;
 use App\Service\Setup\ConfigurationFiles;
 use App\Service\Wrapper\OrigamiStyle;
@@ -26,6 +27,7 @@ class UninstallCommand extends AbstractBaseCommand
 {
     public function __construct(
         private ApplicationContext $applicationContext,
+        private ApplicationData $applicationData,
         private Docker $docker,
         private ConfigurationFiles $uninstaller,
         private EventDispatcherInterface $eventDispatcher,
@@ -42,7 +44,9 @@ class UninstallCommand extends AbstractBaseCommand
         $this->addArgument(
             'environment',
             InputArgument::OPTIONAL,
-            'Name of the environment to uninstall'
+            'Name of the environment to uninstall',
+            null,
+            fn () => array_map(static fn ($environment) => $environment->getName(), (array) $this->applicationData->getAllEnvironments(true))
         );
     }
 
